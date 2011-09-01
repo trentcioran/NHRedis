@@ -310,7 +310,7 @@ namespace NHibernate.Caches.Redis
                 return;
             using (var disposable = new PooledRedisClientManager.DisposablePooledClient<SerializingRedisClient>(ClientManager))
             {
-                disposable.Client.Unlock(CacheNamespace.GlobalKey(key, RedisNamespace.NumTagsForLockKey), AcquiredLocks[key]);
+                disposable.Client.Unlock();
                 AcquiredLocks.Remove(key);
             }
         }
