@@ -126,7 +126,8 @@ namespace NHibernate.Caches.Redis
         #region ICache Members
 
         public abstract object Get(object key);
-        public abstract void Put(object key, object value);
+        public abstract void Put(IList<Cache.PutParameters.CacheVersionedPutParameters> putParameters);
+        public abstract void Put(Cache.PutParameters.CachePutParameters putParameters);
         public abstract void Remove(object key);
         public abstract void Clear();
         public abstract void Destroy();
@@ -159,6 +160,7 @@ namespace NHibernate.Caches.Redis
         }
 
         public abstract IDictionary MultiGet(IEnumerable keys);
+
 
         #endregion
 
