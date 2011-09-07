@@ -71,10 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractCache.cs" />
-    <Compile Include="CachePutParameters.cs" />
-    <Compile Include="CacheVersionedPutParameters.cs" />
-    <Compile Include="CachedItem.cs" />
-    <Compile Include="LockableCachedItem.cs" />
     <Compile Include="NHRedisClientBase.cs" />
     <Compile Include="NHRedisClientNoClear.cs" />
     <Compile Include="NHRedisClient.cs" />
