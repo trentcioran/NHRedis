@@ -56,7 +56,7 @@ namespace NHibernate.Caches.Redis
 		}
 
 		public NhRedisClient(string regionName, IDictionary<string, string> properties)
-			: this(regionName, null,  properties, null)
+			: this(regionName, properties, null)
 		{
 		}
         /// <summary>
@@ -65,8 +65,8 @@ namespace NHibernate.Caches.Redis
         /// <param name="regionName"></param>
         /// <param name="properties"></param>
         /// <param name="manager"></param>
-        public NhRedisClient(string regionName, string cacheConcurrencyStrategy, IDictionary<string, string> properties, PooledRedisClientManager manager)
-            : base(regionName,  cacheConcurrencyStrategy, properties,manager)
+        public NhRedisClient(string regionName, IDictionary<string, string> properties, PooledRedisClientManager manager)
+            : base(regionName, properties,manager)
 		{
             //make sure generation is synched with server
             SynchGeneration();

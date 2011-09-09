@@ -1,6 +1,4 @@
-﻿#region License
-
-//
+﻿//
 //  NHRedis - A cache provider for NHibernate using the .NET client
 // ServiceStackRedis for Redis
 // (http://code.google.com/p/servicestack/wiki/ServiceStackRedis)
@@ -22,9 +20,7 @@
 // CLOVER:OFF
 //
 
-#endregion
-
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 ﻿using NHibernate.Cache;
@@ -44,26 +40,23 @@ namespace NHibernate.Caches.Redis
         protected readonly string _region;
         protected readonly string _regionPrefix;
 
-        protected string _concurrencyStrategy;
-
         public static string ExpirationPropertyKey = "expiration";
         public static string LockAcquisitionTimeoutPropertyKey = "lock_acquisition_timeout";
         public static string LockTimeoutPropertyKey = "lock_timeout";
 
         public AbstractCache()
-            : this("nhibernate",  null, null)
+            : this("nhibernate",   null)
         {
         }
 
         public AbstractCache(string regionName)
-            : this(regionName, null, null)
+            : this(regionName,  null)
         {
         }
 
 
-        public AbstractCache(string regionName,  string cacheConcurrencyStragey, IDictionary<string, string> properties)
+        public AbstractCache(string regionName,   IDictionary<string, string> properties)
         {
-            _concurrencyStrategy = cacheConcurrencyStragey;
             _region = regionName;
             _expiry = 300;
             _lockAcquisitionTimeout = 30;

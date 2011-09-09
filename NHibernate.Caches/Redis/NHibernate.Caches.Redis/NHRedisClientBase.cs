@@ -68,7 +68,7 @@ namespace NHibernate.Caches.Redis
         }
 
         public NhRedisClientBase(string regionName, IDictionary<string, string> properties)
-            : this(regionName, null, properties, null)
+            : this(regionName, properties, null)
         {
         }
         /// <summary>
@@ -78,8 +78,8 @@ namespace NHibernate.Caches.Redis
         /// <param name="cacheConcurrencyStrategy"></param>
         /// <param name="properties"></param>
         /// <param name="manager"></param>
-        public NhRedisClientBase(string regionName, string cacheConcurrencyStrategy, IDictionary<string, string> properties, PooledRedisClientManager manager)
-            : base(regionName, cacheConcurrencyStrategy, properties)
+        public NhRedisClientBase(string regionName, IDictionary<string, string> properties, PooledRedisClientManager manager)
+            : base(regionName,  properties)
         {
             ClientManager = manager;
 

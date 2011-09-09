@@ -93,8 +93,8 @@ namespace NHibernate.Caches.Redis
                 noClearClient = properties[NoClearPropertyKey] == "true";
           
             if (noClearClient)
-                return new NhRedisClientNoClear(regionName, null, properties, _clientManager);
-            return new NhRedisClient(regionName, null, properties, _clientManager);
+                return new NhRedisClientNoClear(regionName, properties, _clientManager);
+            return new NhRedisClient(regionName, properties, _clientManager);
 		}
 
 
