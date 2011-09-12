@@ -36,7 +36,7 @@ namespace NHibernate.Caches.Redis.Tests
     {
         private readonly int _lockTimeout = 2;
         [TestFixtureSetUp]
-        public void FixtureSetup()
+        public override void FixtureSetup()
         {
             XmlConfigurator.Configure();
             _props = new Dictionary<string, string> {{RedisProvider.NoClearPropertyKey, "true"}, 

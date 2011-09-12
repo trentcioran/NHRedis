@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using ServiceStack.Redis;
 using ServiceStack.Redis.Pipeline;
 using ServiceStack.Redis.Support;
+using ServiceStack.Redis.Support.Locking;
 using ServiceStack.Redis.Support.Queue.Implementation;
 
 namespace NHibernate.Caches.Redis
@@ -293,10 +294,21 @@ namespace NHibernate.Caches.Redis
         {
             using (var disposable = new PooledRedisClientManager.DisposablePooledClient<SerializingRedisClient>(ClientManager))
             {
-                long lockExpire = disposable.Client.Lock(CacheNamespace.GlobalKey(key, RedisNamespace.NumTagsForLockKey), _lockAcquisitionTimeout, _lockTimeout);
-                bool rc = (lockExpire != 0);
-                if (rc)
-                    AcquiredLocks[key] = lockExpire;
+                long lockExpire = 0;
+                var aLock = new DistributedLock();
+                var globalKey = CacheNamespace.GlobalKey(key, RedisNamespace.NumTagsForLockKey);
+                try
+                {
+                    long rc = aLock.Lock(globalKey, _lockAcquisitionTimeout, _lockTimeout, out lockExpire, disposable.Client);
+                    if (rc != DistributedLock.LOCK_NOT_ACQUIRED)
+                        AcquiredLocks[key] = lockExpire;
+                }
+                catch (Exception)
+                {
+                    if (lockExpire != 0)
+                        aLock.Unlock(globalKey, lockExpire, disposable.Client);
+                }
+
             }
         }
 
@@ -310,8 +322,11 @@ namespace NHibernate.Caches.Redis
                 return;
             using (var disposable = new PooledRedisClientManager.DisposablePooledClient<SerializingRedisClient>(ClientManager))
             {
-                disposable.Client.Unlock();
-                AcquiredLocks.Remove(key);
+                var aLock = new DistributedLock();
+                var globalKey = CacheNamespace.GlobalKey(key, RedisNamespace.NumTagsForLockKey);
+                if (aLock.Unlock(globalKey, AcquiredLocks[key], disposable.Client))
+                    AcquiredLocks.Remove(key);
+
             }
         }
 
