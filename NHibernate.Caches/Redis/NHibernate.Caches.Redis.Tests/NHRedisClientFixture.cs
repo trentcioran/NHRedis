@@ -31,6 +31,7 @@ using System.Threading;
 using Iesi.Collections;
 using log4net.Config;
 using NHibernate.Cache;
+using NHibernate.Cache.PutParameters;
 using NUnit.Framework;
 
 namespace NHibernate.Caches.Redis.Tests
@@ -70,7 +71,7 @@ namespace NHibernate.Caches.Redis.Tests
 			Assert.IsNotNull(cache, "no cache returned");
 
 			// add the item
-			cache.Put(key, value );
+			cache.Put(new CachePutParameters(key, value) );
 			Thread.Sleep(1000);
 
 			// make sure it's there
@@ -110,7 +111,7 @@ namespace NHibernate.Caches.Redis.Tests
 		public void TestNullKeyGet()
 		{
             var cache = _provider.BuildCache("nunit", _props);
-			cache.Put("nunit", "value");
+			cache.Put(new CachePutParameters("nunit", "value"));
 			Thread.Sleep(1000);
 			var item = cache.Get(null);
 			Assert.IsNull(item);
@@ -120,7 +121,7 @@ namespace NHibernate.Caches.Redis.Tests
 		public void TestNullKeyPut()
 		{
             ICache cache = new NhRedisClient();
-			Assert.Throws<ArgumentNullException>(() => cache.Put(null, null));
+			Assert.Throws<ArgumentNullException>(() => cache.Put(new CachePutParameters(null, null)));
 		}
 
 		[Test]
@@ -134,7 +135,7 @@ namespace NHibernate.Caches.Redis.Tests
 		public void TestNullValuePut()
 		{
             ICache cache = new NhRedisClient();
-			Assert.Throws<ArgumentNullException>(() => cache.Put("nunit", null ));
+			Assert.Throws<ArgumentNullException>(() => cache.Put(new CachePutParameters("nunit", null )));
 		}
 
         [Serializable]
@@ -163,8 +164,8 @@ namespace NHibernate.Caches.Redis.Tests
             var cache2 = _provider.BuildCache("nunit2", _props);
 			const string s1 = "test1";
 			const string s2 = "test2";
-			cache1.Put( key, s1 );
-			cache2.Put( key, s2 );
+			cache1.Put( new CachePutParameters(key, s1) );
+			cache2.Put( new CachePutParameters(key, s2) );
 			Thread.Sleep(1000);
 			var get1 = cache1.Get(key);
 			var get2 = cache2.Get(key);
@@ -181,7 +182,7 @@ namespace NHibernate.Caches.Redis.Tests
 			Assert.IsNotNull(cache, "no cache returned");
 
 			// add the item
-			cache.Put(key, value);
+			cache.Put(new CachePutParameters(key, value));
 			Thread.Sleep(1000);
 
 			// make sure it's there
