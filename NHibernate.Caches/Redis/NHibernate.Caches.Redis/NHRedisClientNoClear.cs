@@ -94,7 +94,7 @@ namespace NHibernate.Caches.Redis
             }
             catch (Exception)
             {
-                Log.WarnFormat("could not get: {0}", key);
+                Log.WarnFormat("Could Not Get: {0}", key);
                 throw;
             }
             return rc;
@@ -126,15 +126,21 @@ namespace NHibernate.Caches.Redis
 
                     using (var pipe = client.CreatePipeline())
                     {
-                        pipe.QueueCommand(r => ((IRedisNativeClient)r).SetEx(globalKey, _expiry, client.Serialize(value)));
-                     
+                        if (_expiry > 0)
+                        {
+                            pipe.QueueCommand(r => ((IRedisNativeClient)r).SetEx(globalKey, _expiry, client.Serialize(value)));
+                        }
+                        else
+                        {
+                            pipe.QueueCommand(r => ((IRedisNativeClient)r).Set(globalKey, client.Serialize(value)));
+                        }
                         pipe.Flush();
                     }
                 }
             }
             catch (Exception)
             {
-                Log.WarnFormat("could not put {0} for key {1}", value, key);
+                Log.WarnFormat("Could Not Put {0} for key {1}", value, key);
                 throw;
             }
         }
@@ -191,12 +197,16 @@ namespace NHibernate.Caches.Redis
                         {
                             //setex on all new objects
                             ScratchCacheItem item = scratch;
-                            trans.QueueCommand(
-                                r => ((IRedisNativeClient) r).SetEx(
-                                    CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
-                                    _expiry, client.Serialize(item.NewCacheValue) ));
-
-                         
+                            if (_expiry > 0)
+                            {
+                                trans.QueueCommand(r => ((IRedisNativeClient)r).SetEx(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                            _expiry, client.Serialize(item.NewCacheValue)));
+                            }
+                            else
+                            {
+                                trans.QueueCommand(r => ((IRedisNativeClient)r).Set(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                  client.Serialize(item.NewCacheValue)));
+                            }
                         }
                         success = trans.Commit();
                     }
@@ -212,20 +222,21 @@ namespace NHibernate.Caches.Redis
                         // try to put new items in cache
                         using (var trans = client.CreateTransaction())
                         {
-
                             foreach (var scratch in scratchItems)
                             {
                                 //setex on all new objects
-                                ScratchCacheItem item = scratch;
-                                trans.QueueCommand(
-                                    r =>
-                                    ((IRedisNativeClient)r).SetEx(
-                                        CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
-                                        _expiry, client.Serialize(item.NewCacheValue) ));
+                                var item = scratch;
+                                if (_expiry > 0)
+                                {
+                                    trans.QueueCommand(r => ((IRedisNativeClient)r).SetEx(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                   _expiry, client.Serialize(item.NewCacheValue)));
+                                }
+                                else
+                                {
+                                    trans.QueueCommand(r => ((IRedisNativeClient)r).Set(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                   client.Serialize(item.NewCacheValue)));
+                                }
                             }
-
-                            //update live query cache 
-
                             success = trans.Commit();
                         }
                     }
@@ -235,7 +246,7 @@ namespace NHibernate.Caches.Redis
             {
                 foreach (var putParams in putParameters)
                 {
-                    Log.WarnFormat("could not get: {0}", putParams.Key);
+                    Log.WarnFormat("Could Not Pet: {0}", putParams.Key);
                 }
 
                 throw;

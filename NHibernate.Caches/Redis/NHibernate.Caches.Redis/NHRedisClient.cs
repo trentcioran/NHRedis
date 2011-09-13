@@ -166,8 +166,15 @@ namespace NHibernate.Caches.Redis
                     {
                         using (var trans = client.CreateTransaction())
                         {
-                            trans.QueueCommand(r => ((IRedisNativeClient)r).SetEx(CacheNamespace.GlobalCacheKey(key),
-                                                                _expiry, bytes));
+                            if (_expiry > 0)
+                            {
+                                trans.QueueCommand(r => ((IRedisNativeClient) r).SetEx(CacheNamespace.GlobalCacheKey(key),
+                                                                        _expiry, bytes));
+                            }
+                            else
+                            {
+                                trans.QueueCommand(r => ((IRedisNativeClient)r).Set(CacheNamespace.GlobalCacheKey(key), bytes));
+                            }
 
                             //add key to globalKeys set for this namespace
                             trans.QueueCommand(r => r.AddItemToSet(CacheNamespace.GetGlobalKeysKey(),
@@ -256,12 +263,18 @@ namespace NHibernate.Caches.Redis
                         foreach (var scratch in scratchItems)
                         {
                             //setex on all new objects
-                            ScratchCacheItem item = scratch;
-                            trans.QueueCommand(
-                                r =>
-                                ((IRedisNativeClient) r).SetEx(
-                                    CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
-                                    _expiry, client.Serialize(item.NewCacheValue)));
+                            var item = scratch;
+                            if (_expiry > 0)
+                            {
+                                trans.QueueCommand(r => ((IRedisNativeClient)r).SetEx(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                    _expiry, client.Serialize(item.NewCacheValue)));                            
+                            }
+                            else
+                            {
+                                trans.QueueCommand(r => ((IRedisNativeClient)r).Set(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                 client.Serialize(item.NewCacheValue)));                         
+                            }
+
 
                             //add keys to globalKeys set for this namespace
                             trans.QueueCommand(r => r.AddItemToSet(CacheNamespace.GetGlobalKeysKey(),
@@ -298,12 +311,18 @@ namespace NHibernate.Caches.Redis
                             foreach (var scratch in scratchItems)
                             {
                                 //setex on all new objects
-                                ScratchCacheItem item = scratch;
-                                trans.QueueCommand(
-                                    r =>
-                                    ((IRedisNativeClient)r).SetEx(
-                                        CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
-                                        _expiry, client.Serialize(item.NewCacheValue)));
+                                var item = scratch;
+                                if (_expiry > 0)
+                                {
+                                    trans.QueueCommand(r => ((IRedisNativeClient)r).SetEx(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                _expiry, client.Serialize(item.NewCacheValue)));
+                                }
+                                else
+                                {
+                                    trans.QueueCommand(r =>((IRedisNativeClient)r).Set(CacheNamespace.GlobalCacheKey(item.PutParameters.Key),
+                                                                client.Serialize(item.NewCacheValue)));
+                                }
+                             
 
                                 //add keys to globalKeys set for this namespace
                                 trans.QueueCommand(r => r.AddItemToSet(CacheNamespace.GetGlobalKeysKey(),
